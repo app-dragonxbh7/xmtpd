@@ -911,6 +911,97 @@ type UpdatePermissionData_V1_ struct {
 
 func (*UpdatePermissionData_V1_) isUpdatePermissionData_Version() {}
 
+// Generic AppData write intent — local-only serialization for the
+// `group_intents` table. Replaces the proliferation of per-component
+// IntentKind/IntentData pairs with a single shape that carries the
+// target component_id and the same payload bytes that will be written
+// to the on-wire `AppDataUpdate` proposal. Interpretation of `payload`
+// is determined by the target component's `ComponentType` in the
+// registry:
+//
+//   - `Bytes` / `String` typed components — payload is the new value
+//     written verbatim (last-writer-wins).
+//   - `TlsMap` typed components — payload is a TLS-encoded
+//     `TlsMapDelta<K, V>` carrying `Insert` / `Update` / `Delete`
+//     mutations. Apply semantics on the receive side are total
+//     (Insert is no-op-if-present, Update is upsert, Delete is
+//     idempotent); the strict variants of the in-process TlsMap API
+//     are not exposed on the wire. No "conflict" failure path.
+//   - `TlsSet` typed components — payload is a TLS-encoded
+//     `TlsSetDelta<E>` (`Add` is no-op-if-present, `Remove` is
+//     idempotent).
+//
+// Never appears on the MLS wire; lives only in the local intents
+// table.
+type AppDataUpdateData struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Versioned envelope. New variants are added as new oneof entries;
+	// readers that don't recognize a variant fail closed.
+	//
+	// Types that are valid to be assigned to Version:
+	//
+	//	*AppDataUpdateData_V1_
+	Version       isAppDataUpdateData_Version `protobuf_oneof:"version"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AppDataUpdateData) Reset() {
+	*x = AppDataUpdateData{}
+	mi := &file_mls_database_intents_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AppDataUpdateData) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AppDataUpdateData) ProtoMessage() {}
+
+func (x *AppDataUpdateData) ProtoReflect() protoreflect.Message {
+	mi := &file_mls_database_intents_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AppDataUpdateData.ProtoReflect.Descriptor instead.
+func (*AppDataUpdateData) Descriptor() ([]byte, []int) {
+	return file_mls_database_intents_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *AppDataUpdateData) GetVersion() isAppDataUpdateData_Version {
+	if x != nil {
+		return x.Version
+	}
+	return nil
+}
+
+func (x *AppDataUpdateData) GetV1() *AppDataUpdateData_V1 {
+	if x != nil {
+		if x, ok := x.Version.(*AppDataUpdateData_V1_); ok {
+			return x.V1
+		}
+	}
+	return nil
+}
+
+type isAppDataUpdateData_Version interface {
+	isAppDataUpdateData_Version()
+}
+
+type AppDataUpdateData_V1_ struct {
+	V1 *AppDataUpdateData_V1 `protobuf:"bytes,1,opt,name=v1,proto3,oneof"`
+}
+
+func (*AppDataUpdateData_V1_) isAppDataUpdateData_Version() {}
+
 // Generic data-type for all post-commit actions
 type PostCommitAction struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -924,7 +1015,7 @@ type PostCommitAction struct {
 
 func (x *PostCommitAction) Reset() {
 	*x = PostCommitAction{}
-	mi := &file_mls_database_intents_proto_msgTypes[11]
+	mi := &file_mls_database_intents_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -936,7 +1027,7 @@ func (x *PostCommitAction) String() string {
 func (*PostCommitAction) ProtoMessage() {}
 
 func (x *PostCommitAction) ProtoReflect() protoreflect.Message {
-	mi := &file_mls_database_intents_proto_msgTypes[11]
+	mi := &file_mls_database_intents_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -949,7 +1040,7 @@ func (x *PostCommitAction) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PostCommitAction.ProtoReflect.Descriptor instead.
 func (*PostCommitAction) Descriptor() ([]byte, []int) {
-	return file_mls_database_intents_proto_rawDescGZIP(), []int{11}
+	return file_mls_database_intents_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *PostCommitAction) GetKind() isPostCommitAction_Kind {
@@ -978,6 +1069,204 @@ type PostCommitAction_SendWelcomes_ struct {
 
 func (*PostCommitAction_SendWelcomes_) isPostCommitAction_Kind() {}
 
+type ProposeMemberUpdateData struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to Version:
+	//
+	//	*ProposeMemberUpdateData_V1_
+	Version       isProposeMemberUpdateData_Version `protobuf_oneof:"version"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ProposeMemberUpdateData) Reset() {
+	*x = ProposeMemberUpdateData{}
+	mi := &file_mls_database_intents_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ProposeMemberUpdateData) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProposeMemberUpdateData) ProtoMessage() {}
+
+func (x *ProposeMemberUpdateData) ProtoReflect() protoreflect.Message {
+	mi := &file_mls_database_intents_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProposeMemberUpdateData.ProtoReflect.Descriptor instead.
+func (*ProposeMemberUpdateData) Descriptor() ([]byte, []int) {
+	return file_mls_database_intents_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *ProposeMemberUpdateData) GetVersion() isProposeMemberUpdateData_Version {
+	if x != nil {
+		return x.Version
+	}
+	return nil
+}
+
+func (x *ProposeMemberUpdateData) GetV1() *ProposeMemberUpdateData_V1 {
+	if x != nil {
+		if x, ok := x.Version.(*ProposeMemberUpdateData_V1_); ok {
+			return x.V1
+		}
+	}
+	return nil
+}
+
+type isProposeMemberUpdateData_Version interface {
+	isProposeMemberUpdateData_Version()
+}
+
+type ProposeMemberUpdateData_V1_ struct {
+	V1 *ProposeMemberUpdateData_V1 `protobuf:"bytes,1,opt,name=v1,proto3,oneof"`
+}
+
+func (*ProposeMemberUpdateData_V1_) isProposeMemberUpdateData_Version() {}
+
+type ProposeGroupContextExtensionData struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to Version:
+	//
+	//	*ProposeGroupContextExtensionData_V1_
+	Version       isProposeGroupContextExtensionData_Version `protobuf_oneof:"version"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ProposeGroupContextExtensionData) Reset() {
+	*x = ProposeGroupContextExtensionData{}
+	mi := &file_mls_database_intents_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ProposeGroupContextExtensionData) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProposeGroupContextExtensionData) ProtoMessage() {}
+
+func (x *ProposeGroupContextExtensionData) ProtoReflect() protoreflect.Message {
+	mi := &file_mls_database_intents_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProposeGroupContextExtensionData.ProtoReflect.Descriptor instead.
+func (*ProposeGroupContextExtensionData) Descriptor() ([]byte, []int) {
+	return file_mls_database_intents_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *ProposeGroupContextExtensionData) GetVersion() isProposeGroupContextExtensionData_Version {
+	if x != nil {
+		return x.Version
+	}
+	return nil
+}
+
+func (x *ProposeGroupContextExtensionData) GetV1() *ProposeGroupContextExtensionData_V1 {
+	if x != nil {
+		if x, ok := x.Version.(*ProposeGroupContextExtensionData_V1_); ok {
+			return x.V1
+		}
+	}
+	return nil
+}
+
+type isProposeGroupContextExtensionData_Version interface {
+	isProposeGroupContextExtensionData_Version()
+}
+
+type ProposeGroupContextExtensionData_V1_ struct {
+	V1 *ProposeGroupContextExtensionData_V1 `protobuf:"bytes,1,opt,name=v1,proto3,oneof"`
+}
+
+func (*ProposeGroupContextExtensionData_V1_) isProposeGroupContextExtensionData_Version() {}
+
+type CommitPendingProposalsData struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Types that are valid to be assigned to Version:
+	//
+	//	*CommitPendingProposalsData_V1_
+	Version       isCommitPendingProposalsData_Version `protobuf_oneof:"version"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CommitPendingProposalsData) Reset() {
+	*x = CommitPendingProposalsData{}
+	mi := &file_mls_database_intents_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CommitPendingProposalsData) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CommitPendingProposalsData) ProtoMessage() {}
+
+func (x *CommitPendingProposalsData) ProtoReflect() protoreflect.Message {
+	mi := &file_mls_database_intents_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CommitPendingProposalsData.ProtoReflect.Descriptor instead.
+func (*CommitPendingProposalsData) Descriptor() ([]byte, []int) {
+	return file_mls_database_intents_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *CommitPendingProposalsData) GetVersion() isCommitPendingProposalsData_Version {
+	if x != nil {
+		return x.Version
+	}
+	return nil
+}
+
+func (x *CommitPendingProposalsData) GetV1() *CommitPendingProposalsData_V1 {
+	if x != nil {
+		if x, ok := x.Version.(*CommitPendingProposalsData_V1_); ok {
+			return x.V1
+		}
+	}
+	return nil
+}
+
+type isCommitPendingProposalsData_Version interface {
+	isCommitPendingProposalsData_Version()
+}
+
+type CommitPendingProposalsData_V1_ struct {
+	V1 *CommitPendingProposalsData_V1 `protobuf:"bytes,1,opt,name=v1,proto3,oneof"`
+}
+
+func (*CommitPendingProposalsData_V1_) isCommitPendingProposalsData_Version() {}
+
 // V1 of SendMessagePublishData
 type SendMessageData_V1 struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -988,7 +1277,7 @@ type SendMessageData_V1 struct {
 
 func (x *SendMessageData_V1) Reset() {
 	*x = SendMessageData_V1{}
-	mi := &file_mls_database_intents_proto_msgTypes[12]
+	mi := &file_mls_database_intents_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1000,7 +1289,7 @@ func (x *SendMessageData_V1) String() string {
 func (*SendMessageData_V1) ProtoMessage() {}
 
 func (x *SendMessageData_V1) ProtoReflect() protoreflect.Message {
-	mi := &file_mls_database_intents_proto_msgTypes[12]
+	mi := &file_mls_database_intents_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1033,7 +1322,7 @@ type AddMembersData_V1 struct {
 
 func (x *AddMembersData_V1) Reset() {
 	*x = AddMembersData_V1{}
-	mi := &file_mls_database_intents_proto_msgTypes[13]
+	mi := &file_mls_database_intents_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1045,7 +1334,7 @@ func (x *AddMembersData_V1) String() string {
 func (*AddMembersData_V1) ProtoMessage() {}
 
 func (x *AddMembersData_V1) ProtoReflect() protoreflect.Message {
-	mi := &file_mls_database_intents_proto_msgTypes[13]
+	mi := &file_mls_database_intents_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1078,7 +1367,7 @@ type RemoveMembersData_V1 struct {
 
 func (x *RemoveMembersData_V1) Reset() {
 	*x = RemoveMembersData_V1{}
-	mi := &file_mls_database_intents_proto_msgTypes[14]
+	mi := &file_mls_database_intents_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1090,7 +1379,7 @@ func (x *RemoveMembersData_V1) String() string {
 func (*RemoveMembersData_V1) ProtoMessage() {}
 
 func (x *RemoveMembersData_V1) ProtoReflect() protoreflect.Message {
-	mi := &file_mls_database_intents_proto_msgTypes[14]
+	mi := &file_mls_database_intents_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1128,7 +1417,7 @@ type UpdateGroupMembershipData_V1 struct {
 
 func (x *UpdateGroupMembershipData_V1) Reset() {
 	*x = UpdateGroupMembershipData_V1{}
-	mi := &file_mls_database_intents_proto_msgTypes[15]
+	mi := &file_mls_database_intents_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1140,7 +1429,7 @@ func (x *UpdateGroupMembershipData_V1) String() string {
 func (*UpdateGroupMembershipData_V1) ProtoMessage() {}
 
 func (x *UpdateGroupMembershipData_V1) ProtoReflect() protoreflect.Message {
-	mi := &file_mls_database_intents_proto_msgTypes[15]
+	mi := &file_mls_database_intents_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1186,7 +1475,7 @@ type ReaddInstallationsData_V1 struct {
 
 func (x *ReaddInstallationsData_V1) Reset() {
 	*x = ReaddInstallationsData_V1{}
-	mi := &file_mls_database_intents_proto_msgTypes[17]
+	mi := &file_mls_database_intents_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1198,7 +1487,7 @@ func (x *ReaddInstallationsData_V1) String() string {
 func (*ReaddInstallationsData_V1) ProtoMessage() {}
 
 func (x *ReaddInstallationsData_V1) ProtoReflect() protoreflect.Message {
-	mi := &file_mls_database_intents_proto_msgTypes[17]
+	mi := &file_mls_database_intents_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1223,16 +1512,21 @@ func (x *ReaddInstallationsData_V1) GetReaddedInstallations() [][]byte {
 
 // V1 of UpdateMetadataPublishData
 type UpdateMetadataData_V1 struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	FieldName     string                 `protobuf:"bytes,1,opt,name=field_name,json=fieldName,proto3" json:"field_name,omitempty"`
-	FieldValue    string                 `protobuf:"bytes,2,opt,name=field_value,json=fieldValue,proto3" json:"field_value,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state      protoimpl.MessageState `protogen:"open.v1"`
+	FieldName  string                 `protobuf:"bytes,1,opt,name=field_name,json=fieldName,proto3" json:"field_name,omitempty"`
+	FieldValue string                 `protobuf:"bytes,2,opt,name=field_value,json=fieldValue,proto3" json:"field_value,omitempty"`
+	// Compare-and-swap guard. When set, the publisher must abandon this
+	// intent unless the field's currently committed value equals this,
+	// rather than overwriting whatever landed in the meantime. Absent
+	// means last-writer-wins, which is the historical behavior.
+	ExpectedFieldValue *string `protobuf:"bytes,3,opt,name=expected_field_value,json=expectedFieldValue,proto3,oneof" json:"expected_field_value,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
 }
 
 func (x *UpdateMetadataData_V1) Reset() {
 	*x = UpdateMetadataData_V1{}
-	mi := &file_mls_database_intents_proto_msgTypes[18]
+	mi := &file_mls_database_intents_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1244,7 +1538,7 @@ func (x *UpdateMetadataData_V1) String() string {
 func (*UpdateMetadataData_V1) ProtoMessage() {}
 
 func (x *UpdateMetadataData_V1) ProtoReflect() protoreflect.Message {
-	mi := &file_mls_database_intents_proto_msgTypes[18]
+	mi := &file_mls_database_intents_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1274,6 +1568,13 @@ func (x *UpdateMetadataData_V1) GetFieldValue() string {
 	return ""
 }
 
+func (x *UpdateMetadataData_V1) GetExpectedFieldValue() string {
+	if x != nil && x.ExpectedFieldValue != nil {
+		return *x.ExpectedFieldValue
+	}
+	return ""
+}
+
 // V1 of UpdateAdminListsPublishData
 type UpdateAdminListsData_V1 struct {
 	state               protoimpl.MessageState `protogen:"open.v1"`
@@ -1285,7 +1586,7 @@ type UpdateAdminListsData_V1 struct {
 
 func (x *UpdateAdminListsData_V1) Reset() {
 	*x = UpdateAdminListsData_V1{}
-	mi := &file_mls_database_intents_proto_msgTypes[19]
+	mi := &file_mls_database_intents_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1297,7 +1598,7 @@ func (x *UpdateAdminListsData_V1) String() string {
 func (*UpdateAdminListsData_V1) ProtoMessage() {}
 
 func (x *UpdateAdminListsData_V1) ProtoReflect() protoreflect.Message {
-	mi := &file_mls_database_intents_proto_msgTypes[19]
+	mi := &file_mls_database_intents_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1340,7 +1641,7 @@ type UpdatePermissionData_V1 struct {
 
 func (x *UpdatePermissionData_V1) Reset() {
 	*x = UpdatePermissionData_V1{}
-	mi := &file_mls_database_intents_proto_msgTypes[20]
+	mi := &file_mls_database_intents_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1352,7 +1653,7 @@ func (x *UpdatePermissionData_V1) String() string {
 func (*UpdatePermissionData_V1) ProtoMessage() {}
 
 func (x *UpdatePermissionData_V1) ProtoReflect() protoreflect.Message {
-	mi := &file_mls_database_intents_proto_msgTypes[20]
+	mi := &file_mls_database_intents_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1389,6 +1690,65 @@ func (x *UpdatePermissionData_V1) GetMetadataFieldName() string {
 	return ""
 }
 
+// v1 payload shape.
+type AppDataUpdateData_V1 struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// u16 component_id widened to u32 (proto has no u16). The
+	// dispatcher narrows back to u16 at decode time.
+	ComponentId uint32 `protobuf:"varint,1,opt,name=component_id,json=componentId,proto3" json:"component_id,omitempty"`
+	// The bytes that will be written verbatim as the on-wire
+	// AppDataUpdate proposal payload. Interpretation determined by
+	// the component's registered ComponentType (see message-level
+	// comment above).
+	Payload       []byte `protobuf:"bytes,2,opt,name=payload,proto3" json:"payload,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AppDataUpdateData_V1) Reset() {
+	*x = AppDataUpdateData_V1{}
+	mi := &file_mls_database_intents_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AppDataUpdateData_V1) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AppDataUpdateData_V1) ProtoMessage() {}
+
+func (x *AppDataUpdateData_V1) ProtoReflect() protoreflect.Message {
+	mi := &file_mls_database_intents_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AppDataUpdateData_V1.ProtoReflect.Descriptor instead.
+func (*AppDataUpdateData_V1) Descriptor() ([]byte, []int) {
+	return file_mls_database_intents_proto_rawDescGZIP(), []int{11, 0}
+}
+
+func (x *AppDataUpdateData_V1) GetComponentId() uint32 {
+	if x != nil {
+		return x.ComponentId
+	}
+	return 0
+}
+
+func (x *AppDataUpdateData_V1) GetPayload() []byte {
+	if x != nil {
+		return x.Payload
+	}
+	return nil
+}
+
 // An installation
 type PostCommitAction_Installation struct {
 	state                             protoimpl.MessageState                                       `protogen:"open.v1"`
@@ -1402,7 +1762,7 @@ type PostCommitAction_Installation struct {
 
 func (x *PostCommitAction_Installation) Reset() {
 	*x = PostCommitAction_Installation{}
-	mi := &file_mls_database_intents_proto_msgTypes[21]
+	mi := &file_mls_database_intents_proto_msgTypes[26]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1414,7 +1774,7 @@ func (x *PostCommitAction_Installation) String() string {
 func (*PostCommitAction_Installation) ProtoMessage() {}
 
 func (x *PostCommitAction_Installation) ProtoReflect() protoreflect.Message {
-	mi := &file_mls_database_intents_proto_msgTypes[21]
+	mi := &file_mls_database_intents_proto_msgTypes[26]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1427,7 +1787,7 @@ func (x *PostCommitAction_Installation) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PostCommitAction_Installation.ProtoReflect.Descriptor instead.
 func (*PostCommitAction_Installation) Descriptor() ([]byte, []int) {
-	return file_mls_database_intents_proto_rawDescGZIP(), []int{11, 0}
+	return file_mls_database_intents_proto_rawDescGZIP(), []int{12, 0}
 }
 
 func (x *PostCommitAction_Installation) GetInstallationKey() []byte {
@@ -1469,7 +1829,7 @@ type PostCommitAction_SendWelcomes struct {
 
 func (x *PostCommitAction_SendWelcomes) Reset() {
 	*x = PostCommitAction_SendWelcomes{}
-	mi := &file_mls_database_intents_proto_msgTypes[22]
+	mi := &file_mls_database_intents_proto_msgTypes[27]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1481,7 +1841,7 @@ func (x *PostCommitAction_SendWelcomes) String() string {
 func (*PostCommitAction_SendWelcomes) ProtoMessage() {}
 
 func (x *PostCommitAction_SendWelcomes) ProtoReflect() protoreflect.Message {
-	mi := &file_mls_database_intents_proto_msgTypes[22]
+	mi := &file_mls_database_intents_proto_msgTypes[27]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1494,7 +1854,7 @@ func (x *PostCommitAction_SendWelcomes) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PostCommitAction_SendWelcomes.ProtoReflect.Descriptor instead.
 func (*PostCommitAction_SendWelcomes) Descriptor() ([]byte, []int) {
-	return file_mls_database_intents_proto_rawDescGZIP(), []int{11, 1}
+	return file_mls_database_intents_proto_rawDescGZIP(), []int{12, 1}
 }
 
 func (x *PostCommitAction_SendWelcomes) GetInstallations() []*PostCommitAction_Installation {
@@ -1507,6 +1867,147 @@ func (x *PostCommitAction_SendWelcomes) GetInstallations() []*PostCommitAction_I
 func (x *PostCommitAction_SendWelcomes) GetWelcomeMessage() []byte {
 	if x != nil {
 		return x.WelcomeMessage
+	}
+	return nil
+}
+
+type ProposeMemberUpdateData_V1 struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Not hex encoded
+	AddInboxIds    [][]byte `protobuf:"bytes,1,rep,name=add_inbox_ids,json=addInboxIds,proto3" json:"add_inbox_ids,omitempty"`
+	RemoveInboxIds [][]byte `protobuf:"bytes,2,rep,name=remove_inbox_ids,json=removeInboxIds,proto3" json:"remove_inbox_ids,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *ProposeMemberUpdateData_V1) Reset() {
+	*x = ProposeMemberUpdateData_V1{}
+	mi := &file_mls_database_intents_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ProposeMemberUpdateData_V1) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProposeMemberUpdateData_V1) ProtoMessage() {}
+
+func (x *ProposeMemberUpdateData_V1) ProtoReflect() protoreflect.Message {
+	mi := &file_mls_database_intents_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProposeMemberUpdateData_V1.ProtoReflect.Descriptor instead.
+func (*ProposeMemberUpdateData_V1) Descriptor() ([]byte, []int) {
+	return file_mls_database_intents_proto_rawDescGZIP(), []int{13, 0}
+}
+
+func (x *ProposeMemberUpdateData_V1) GetAddInboxIds() [][]byte {
+	if x != nil {
+		return x.AddInboxIds
+	}
+	return nil
+}
+
+func (x *ProposeMemberUpdateData_V1) GetRemoveInboxIds() [][]byte {
+	if x != nil {
+		return x.RemoveInboxIds
+	}
+	return nil
+}
+
+type ProposeGroupContextExtensionData_V1 struct {
+	state                 protoimpl.MessageState `protogen:"open.v1"`
+	GroupContextExtension []byte                 `protobuf:"bytes,1,opt,name=group_context_extension,json=groupContextExtension,proto3" json:"group_context_extension,omitempty"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
+}
+
+func (x *ProposeGroupContextExtensionData_V1) Reset() {
+	*x = ProposeGroupContextExtensionData_V1{}
+	mi := &file_mls_database_intents_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ProposeGroupContextExtensionData_V1) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProposeGroupContextExtensionData_V1) ProtoMessage() {}
+
+func (x *ProposeGroupContextExtensionData_V1) ProtoReflect() protoreflect.Message {
+	mi := &file_mls_database_intents_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProposeGroupContextExtensionData_V1.ProtoReflect.Descriptor instead.
+func (*ProposeGroupContextExtensionData_V1) Descriptor() ([]byte, []int) {
+	return file_mls_database_intents_proto_rawDescGZIP(), []int{14, 0}
+}
+
+func (x *ProposeGroupContextExtensionData_V1) GetGroupContextExtension() []byte {
+	if x != nil {
+		return x.GroupContextExtension
+	}
+	return nil
+}
+
+type CommitPendingProposalsData_V1 struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	ProposalHashes [][]byte               `protobuf:"bytes,1,rep,name=proposal_hashes,json=proposalHashes,proto3" json:"proposal_hashes,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *CommitPendingProposalsData_V1) Reset() {
+	*x = CommitPendingProposalsData_V1{}
+	mi := &file_mls_database_intents_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CommitPendingProposalsData_V1) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CommitPendingProposalsData_V1) ProtoMessage() {}
+
+func (x *CommitPendingProposalsData_V1) ProtoReflect() protoreflect.Message {
+	mi := &file_mls_database_intents_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CommitPendingProposalsData_V1.ProtoReflect.Descriptor instead.
+func (*CommitPendingProposalsData_V1) Descriptor() ([]byte, []int) {
+	return file_mls_database_intents_proto_rawDescGZIP(), []int{15, 0}
+}
+
+func (x *CommitPendingProposalsData_V1) GetProposalHashes() [][]byte {
+	if x != nil {
+		return x.ProposalHashes
 	}
 	return nil
 }
@@ -1553,14 +2054,16 @@ const file_mls_database_intents_proto_rawDesc = "" +
 	"\x02v1\x18\x01 \x01(\v2,.xmtp.mls.database.ReaddInstallationsData.V1H\x00R\x02v1\x1a9\n" +
 	"\x02V1\x123\n" +
 	"\x15readded_installations\x18\x01 \x03(\fR\x14readdedInstallationsB\t\n" +
-	"\aversion\"\xa1\x01\n" +
+	"\aversion\"\xf2\x01\n" +
 	"\x12UpdateMetadataData\x12:\n" +
-	"\x02v1\x18\x01 \x01(\v2(.xmtp.mls.database.UpdateMetadataData.V1H\x00R\x02v1\x1aD\n" +
+	"\x02v1\x18\x01 \x01(\v2(.xmtp.mls.database.UpdateMetadataData.V1H\x00R\x02v1\x1a\x94\x01\n" +
 	"\x02V1\x12\x1d\n" +
 	"\n" +
 	"field_name\x18\x01 \x01(\tR\tfieldName\x12\x1f\n" +
 	"\vfield_value\x18\x02 \x01(\tR\n" +
-	"fieldValueB\t\n" +
+	"fieldValue\x125\n" +
+	"\x14expected_field_value\x18\x03 \x01(\tH\x00R\x12expectedFieldValue\x88\x01\x01B\x17\n" +
+	"\x15_expected_field_valueB\t\n" +
 	"\aversion\"\xdd\x01\n" +
 	"\x14UpdateAdminListsData\x12<\n" +
 	"\x02v1\x18\x01 \x01(\v2*.xmtp.mls.database.UpdateAdminListsData.V1H\x00R\x02v1\x1a|\n" +
@@ -1575,6 +2078,12 @@ const file_mls_database_intents_proto_rawDesc = "" +
 	"\x18permission_policy_option\x18\x02 \x01(\x0e2).xmtp.mls.database.PermissionPolicyOptionR\x16permissionPolicyOption\x123\n" +
 	"\x13metadata_field_name\x18\x03 \x01(\tH\x00R\x11metadataFieldName\x88\x01\x01B\x16\n" +
 	"\x14_metadata_field_nameB\t\n" +
+	"\aversion\"\x9c\x01\n" +
+	"\x11AppDataUpdateData\x129\n" +
+	"\x02v1\x18\x01 \x01(\v2'.xmtp.mls.database.AppDataUpdateData.V1H\x00R\x02v1\x1aA\n" +
+	"\x02V1\x12!\n" +
+	"\fcomponent_id\x18\x01 \x01(\rR\vcomponentId\x12\x18\n" +
+	"\apayload\x18\x02 \x01(\fR\apayloadB\t\n" +
 	"\aversion\"\xf3\x04\n" +
 	"\x10PostCommitAction\x12W\n" +
 	"\rsend_welcomes\x18\x01 \x01(\v20.xmtp.mls.database.PostCommitAction.SendWelcomesH\x00R\fsendWelcomes\x1a\xeb\x02\n" +
@@ -1586,7 +2095,23 @@ const file_mls_database_intents_proto_rawDesc = "" +
 	"\fSendWelcomes\x12V\n" +
 	"\rinstallations\x18\x01 \x03(\v20.xmtp.mls.database.PostCommitAction.InstallationR\rinstallations\x12'\n" +
 	"\x0fwelcome_message\x18\x02 \x01(\fR\x0ewelcomeMessageB\x06\n" +
-	"\x04kind*\xe7\x01\n" +
+	"\x04kind\"\xb9\x01\n" +
+	"\x17ProposeMemberUpdateData\x12?\n" +
+	"\x02v1\x18\x01 \x01(\v2-.xmtp.mls.database.ProposeMemberUpdateData.V1H\x00R\x02v1\x1aR\n" +
+	"\x02V1\x12\"\n" +
+	"\radd_inbox_ids\x18\x01 \x03(\fR\vaddInboxIds\x12(\n" +
+	"\x10remove_inbox_ids\x18\x02 \x03(\fR\x0eremoveInboxIdsB\t\n" +
+	"\aversion\"\xb5\x01\n" +
+	" ProposeGroupContextExtensionData\x12H\n" +
+	"\x02v1\x18\x01 \x01(\v26.xmtp.mls.database.ProposeGroupContextExtensionData.V1H\x00R\x02v1\x1a<\n" +
+	"\x02V1\x126\n" +
+	"\x17group_context_extension\x18\x01 \x01(\fR\x15groupContextExtensionB\t\n" +
+	"\aversion\"\x9a\x01\n" +
+	"\x1aCommitPendingProposalsData\x12B\n" +
+	"\x02v1\x18\x01 \x01(\v20.xmtp.mls.database.CommitPendingProposalsData.V1H\x00R\x02v1\x1a-\n" +
+	"\x02V1\x12'\n" +
+	"\x0fproposal_hashes\x18\x01 \x03(\fR\x0eproposalHashesB\t\n" +
+	"\aversion*\xe7\x01\n" +
 	"\x13AdminListUpdateType\x12&\n" +
 	"\"ADMIN_LIST_UPDATE_TYPE_UNSPECIFIED\x10\x00\x12$\n" +
 	" ADMIN_LIST_UPDATE_TYPE_ADD_ADMIN\x10\x01\x12'\n" +
@@ -1621,63 +2146,75 @@ func file_mls_database_intents_proto_rawDescGZIP() []byte {
 }
 
 var file_mls_database_intents_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_mls_database_intents_proto_msgTypes = make([]protoimpl.MessageInfo, 23)
+var file_mls_database_intents_proto_msgTypes = make([]protoimpl.MessageInfo, 31)
 var file_mls_database_intents_proto_goTypes = []any{
-	(AdminListUpdateType)(0),                      // 0: xmtp.mls.database.AdminListUpdateType
-	(PermissionUpdateType)(0),                     // 1: xmtp.mls.database.PermissionUpdateType
-	(PermissionPolicyOption)(0),                   // 2: xmtp.mls.database.PermissionPolicyOption
-	(*SendMessageData)(nil),                       // 3: xmtp.mls.database.SendMessageData
-	(*AccountAddresses)(nil),                      // 4: xmtp.mls.database.AccountAddresses
-	(*InstallationIds)(nil),                       // 5: xmtp.mls.database.InstallationIds
-	(*AddressesOrInstallationIds)(nil),            // 6: xmtp.mls.database.AddressesOrInstallationIds
-	(*AddMembersData)(nil),                        // 7: xmtp.mls.database.AddMembersData
-	(*RemoveMembersData)(nil),                     // 8: xmtp.mls.database.RemoveMembersData
-	(*UpdateGroupMembershipData)(nil),             // 9: xmtp.mls.database.UpdateGroupMembershipData
-	(*ReaddInstallationsData)(nil),                // 10: xmtp.mls.database.ReaddInstallationsData
-	(*UpdateMetadataData)(nil),                    // 11: xmtp.mls.database.UpdateMetadataData
-	(*UpdateAdminListsData)(nil),                  // 12: xmtp.mls.database.UpdateAdminListsData
-	(*UpdatePermissionData)(nil),                  // 13: xmtp.mls.database.UpdatePermissionData
-	(*PostCommitAction)(nil),                      // 14: xmtp.mls.database.PostCommitAction
-	(*SendMessageData_V1)(nil),                    // 15: xmtp.mls.database.SendMessageData.V1
-	(*AddMembersData_V1)(nil),                     // 16: xmtp.mls.database.AddMembersData.V1
-	(*RemoveMembersData_V1)(nil),                  // 17: xmtp.mls.database.RemoveMembersData.V1
-	(*UpdateGroupMembershipData_V1)(nil),          // 18: xmtp.mls.database.UpdateGroupMembershipData.V1
-	nil,                                           // 19: xmtp.mls.database.UpdateGroupMembershipData.V1.MembershipUpdatesEntry
-	(*ReaddInstallationsData_V1)(nil),             // 20: xmtp.mls.database.ReaddInstallationsData.V1
-	(*UpdateMetadataData_V1)(nil),                 // 21: xmtp.mls.database.UpdateMetadataData.V1
-	(*UpdateAdminListsData_V1)(nil),               // 22: xmtp.mls.database.UpdateAdminListsData.V1
-	(*UpdatePermissionData_V1)(nil),               // 23: xmtp.mls.database.UpdatePermissionData.V1
-	(*PostCommitAction_Installation)(nil),         // 24: xmtp.mls.database.PostCommitAction.Installation
-	(*PostCommitAction_SendWelcomes)(nil),         // 25: xmtp.mls.database.PostCommitAction.SendWelcomes
-	(message_contents.WelcomeWrapperAlgorithm)(0), // 26: xmtp.mls.message_contents.WelcomeWrapperAlgorithm
-	(*message_contents.WelcomePointeeEncryptionAeadTypesExtension)(nil), // 27: xmtp.mls.message_contents.WelcomePointeeEncryptionAeadTypesExtension
+	(AdminListUpdateType)(0),                                            // 0: xmtp.mls.database.AdminListUpdateType
+	(PermissionUpdateType)(0),                                           // 1: xmtp.mls.database.PermissionUpdateType
+	(PermissionPolicyOption)(0),                                         // 2: xmtp.mls.database.PermissionPolicyOption
+	(*SendMessageData)(nil),                                             // 3: xmtp.mls.database.SendMessageData
+	(*AccountAddresses)(nil),                                            // 4: xmtp.mls.database.AccountAddresses
+	(*InstallationIds)(nil),                                             // 5: xmtp.mls.database.InstallationIds
+	(*AddressesOrInstallationIds)(nil),                                  // 6: xmtp.mls.database.AddressesOrInstallationIds
+	(*AddMembersData)(nil),                                              // 7: xmtp.mls.database.AddMembersData
+	(*RemoveMembersData)(nil),                                           // 8: xmtp.mls.database.RemoveMembersData
+	(*UpdateGroupMembershipData)(nil),                                   // 9: xmtp.mls.database.UpdateGroupMembershipData
+	(*ReaddInstallationsData)(nil),                                      // 10: xmtp.mls.database.ReaddInstallationsData
+	(*UpdateMetadataData)(nil),                                          // 11: xmtp.mls.database.UpdateMetadataData
+	(*UpdateAdminListsData)(nil),                                        // 12: xmtp.mls.database.UpdateAdminListsData
+	(*UpdatePermissionData)(nil),                                        // 13: xmtp.mls.database.UpdatePermissionData
+	(*AppDataUpdateData)(nil),                                           // 14: xmtp.mls.database.AppDataUpdateData
+	(*PostCommitAction)(nil),                                            // 15: xmtp.mls.database.PostCommitAction
+	(*ProposeMemberUpdateData)(nil),                                     // 16: xmtp.mls.database.ProposeMemberUpdateData
+	(*ProposeGroupContextExtensionData)(nil),                            // 17: xmtp.mls.database.ProposeGroupContextExtensionData
+	(*CommitPendingProposalsData)(nil),                                  // 18: xmtp.mls.database.CommitPendingProposalsData
+	(*SendMessageData_V1)(nil),                                          // 19: xmtp.mls.database.SendMessageData.V1
+	(*AddMembersData_V1)(nil),                                           // 20: xmtp.mls.database.AddMembersData.V1
+	(*RemoveMembersData_V1)(nil),                                        // 21: xmtp.mls.database.RemoveMembersData.V1
+	(*UpdateGroupMembershipData_V1)(nil),                                // 22: xmtp.mls.database.UpdateGroupMembershipData.V1
+	nil,                                                                 // 23: xmtp.mls.database.UpdateGroupMembershipData.V1.MembershipUpdatesEntry
+	(*ReaddInstallationsData_V1)(nil),                                   // 24: xmtp.mls.database.ReaddInstallationsData.V1
+	(*UpdateMetadataData_V1)(nil),                                       // 25: xmtp.mls.database.UpdateMetadataData.V1
+	(*UpdateAdminListsData_V1)(nil),                                     // 26: xmtp.mls.database.UpdateAdminListsData.V1
+	(*UpdatePermissionData_V1)(nil),                                     // 27: xmtp.mls.database.UpdatePermissionData.V1
+	(*AppDataUpdateData_V1)(nil),                                        // 28: xmtp.mls.database.AppDataUpdateData.V1
+	(*PostCommitAction_Installation)(nil),                               // 29: xmtp.mls.database.PostCommitAction.Installation
+	(*PostCommitAction_SendWelcomes)(nil),                               // 30: xmtp.mls.database.PostCommitAction.SendWelcomes
+	(*ProposeMemberUpdateData_V1)(nil),                                  // 31: xmtp.mls.database.ProposeMemberUpdateData.V1
+	(*ProposeGroupContextExtensionData_V1)(nil),                         // 32: xmtp.mls.database.ProposeGroupContextExtensionData.V1
+	(*CommitPendingProposalsData_V1)(nil),                               // 33: xmtp.mls.database.CommitPendingProposalsData.V1
+	(message_contents.WelcomeWrapperAlgorithm)(0),                       // 34: xmtp.mls.message_contents.WelcomeWrapperAlgorithm
+	(*message_contents.WelcomePointeeEncryptionAeadTypesExtension)(nil), // 35: xmtp.mls.message_contents.WelcomePointeeEncryptionAeadTypesExtension
 }
 var file_mls_database_intents_proto_depIdxs = []int32{
-	15, // 0: xmtp.mls.database.SendMessageData.v1:type_name -> xmtp.mls.database.SendMessageData.V1
+	19, // 0: xmtp.mls.database.SendMessageData.v1:type_name -> xmtp.mls.database.SendMessageData.V1
 	4,  // 1: xmtp.mls.database.AddressesOrInstallationIds.account_addresses:type_name -> xmtp.mls.database.AccountAddresses
 	5,  // 2: xmtp.mls.database.AddressesOrInstallationIds.installation_ids:type_name -> xmtp.mls.database.InstallationIds
-	16, // 3: xmtp.mls.database.AddMembersData.v1:type_name -> xmtp.mls.database.AddMembersData.V1
-	17, // 4: xmtp.mls.database.RemoveMembersData.v1:type_name -> xmtp.mls.database.RemoveMembersData.V1
-	18, // 5: xmtp.mls.database.UpdateGroupMembershipData.v1:type_name -> xmtp.mls.database.UpdateGroupMembershipData.V1
-	20, // 6: xmtp.mls.database.ReaddInstallationsData.v1:type_name -> xmtp.mls.database.ReaddInstallationsData.V1
-	21, // 7: xmtp.mls.database.UpdateMetadataData.v1:type_name -> xmtp.mls.database.UpdateMetadataData.V1
-	22, // 8: xmtp.mls.database.UpdateAdminListsData.v1:type_name -> xmtp.mls.database.UpdateAdminListsData.V1
-	23, // 9: xmtp.mls.database.UpdatePermissionData.v1:type_name -> xmtp.mls.database.UpdatePermissionData.V1
-	25, // 10: xmtp.mls.database.PostCommitAction.send_welcomes:type_name -> xmtp.mls.database.PostCommitAction.SendWelcomes
-	6,  // 11: xmtp.mls.database.AddMembersData.V1.addresses_or_installation_ids:type_name -> xmtp.mls.database.AddressesOrInstallationIds
-	6,  // 12: xmtp.mls.database.RemoveMembersData.V1.addresses_or_installation_ids:type_name -> xmtp.mls.database.AddressesOrInstallationIds
-	19, // 13: xmtp.mls.database.UpdateGroupMembershipData.V1.membership_updates:type_name -> xmtp.mls.database.UpdateGroupMembershipData.V1.MembershipUpdatesEntry
-	0,  // 14: xmtp.mls.database.UpdateAdminListsData.V1.admin_list_update_type:type_name -> xmtp.mls.database.AdminListUpdateType
-	1,  // 15: xmtp.mls.database.UpdatePermissionData.V1.permission_update_type:type_name -> xmtp.mls.database.PermissionUpdateType
-	2,  // 16: xmtp.mls.database.UpdatePermissionData.V1.permission_policy_option:type_name -> xmtp.mls.database.PermissionPolicyOption
-	26, // 17: xmtp.mls.database.PostCommitAction.Installation.welcome_wrapper_algorithm:type_name -> xmtp.mls.message_contents.WelcomeWrapperAlgorithm
-	27, // 18: xmtp.mls.database.PostCommitAction.Installation.welcome_pointee_encryption_aead_types:type_name -> xmtp.mls.message_contents.WelcomePointeeEncryptionAeadTypesExtension
-	24, // 19: xmtp.mls.database.PostCommitAction.SendWelcomes.installations:type_name -> xmtp.mls.database.PostCommitAction.Installation
-	20, // [20:20] is the sub-list for method output_type
-	20, // [20:20] is the sub-list for method input_type
-	20, // [20:20] is the sub-list for extension type_name
-	20, // [20:20] is the sub-list for extension extendee
-	0,  // [0:20] is the sub-list for field type_name
+	20, // 3: xmtp.mls.database.AddMembersData.v1:type_name -> xmtp.mls.database.AddMembersData.V1
+	21, // 4: xmtp.mls.database.RemoveMembersData.v1:type_name -> xmtp.mls.database.RemoveMembersData.V1
+	22, // 5: xmtp.mls.database.UpdateGroupMembershipData.v1:type_name -> xmtp.mls.database.UpdateGroupMembershipData.V1
+	24, // 6: xmtp.mls.database.ReaddInstallationsData.v1:type_name -> xmtp.mls.database.ReaddInstallationsData.V1
+	25, // 7: xmtp.mls.database.UpdateMetadataData.v1:type_name -> xmtp.mls.database.UpdateMetadataData.V1
+	26, // 8: xmtp.mls.database.UpdateAdminListsData.v1:type_name -> xmtp.mls.database.UpdateAdminListsData.V1
+	27, // 9: xmtp.mls.database.UpdatePermissionData.v1:type_name -> xmtp.mls.database.UpdatePermissionData.V1
+	28, // 10: xmtp.mls.database.AppDataUpdateData.v1:type_name -> xmtp.mls.database.AppDataUpdateData.V1
+	30, // 11: xmtp.mls.database.PostCommitAction.send_welcomes:type_name -> xmtp.mls.database.PostCommitAction.SendWelcomes
+	31, // 12: xmtp.mls.database.ProposeMemberUpdateData.v1:type_name -> xmtp.mls.database.ProposeMemberUpdateData.V1
+	32, // 13: xmtp.mls.database.ProposeGroupContextExtensionData.v1:type_name -> xmtp.mls.database.ProposeGroupContextExtensionData.V1
+	33, // 14: xmtp.mls.database.CommitPendingProposalsData.v1:type_name -> xmtp.mls.database.CommitPendingProposalsData.V1
+	6,  // 15: xmtp.mls.database.AddMembersData.V1.addresses_or_installation_ids:type_name -> xmtp.mls.database.AddressesOrInstallationIds
+	6,  // 16: xmtp.mls.database.RemoveMembersData.V1.addresses_or_installation_ids:type_name -> xmtp.mls.database.AddressesOrInstallationIds
+	23, // 17: xmtp.mls.database.UpdateGroupMembershipData.V1.membership_updates:type_name -> xmtp.mls.database.UpdateGroupMembershipData.V1.MembershipUpdatesEntry
+	0,  // 18: xmtp.mls.database.UpdateAdminListsData.V1.admin_list_update_type:type_name -> xmtp.mls.database.AdminListUpdateType
+	1,  // 19: xmtp.mls.database.UpdatePermissionData.V1.permission_update_type:type_name -> xmtp.mls.database.PermissionUpdateType
+	2,  // 20: xmtp.mls.database.UpdatePermissionData.V1.permission_policy_option:type_name -> xmtp.mls.database.PermissionPolicyOption
+	34, // 21: xmtp.mls.database.PostCommitAction.Installation.welcome_wrapper_algorithm:type_name -> xmtp.mls.message_contents.WelcomeWrapperAlgorithm
+	35, // 22: xmtp.mls.database.PostCommitAction.Installation.welcome_pointee_encryption_aead_types:type_name -> xmtp.mls.message_contents.WelcomePointeeEncryptionAeadTypesExtension
+	29, // 23: xmtp.mls.database.PostCommitAction.SendWelcomes.installations:type_name -> xmtp.mls.database.PostCommitAction.Installation
+	24, // [24:24] is the sub-list for method output_type
+	24, // [24:24] is the sub-list for method input_type
+	24, // [24:24] is the sub-list for extension type_name
+	24, // [24:24] is the sub-list for extension extendee
+	0,  // [0:24] is the sub-list for field type_name
 }
 
 func init() { file_mls_database_intents_proto_init() }
@@ -1714,16 +2251,29 @@ func file_mls_database_intents_proto_init() {
 		(*UpdatePermissionData_V1_)(nil),
 	}
 	file_mls_database_intents_proto_msgTypes[11].OneofWrappers = []any{
+		(*AppDataUpdateData_V1_)(nil),
+	}
+	file_mls_database_intents_proto_msgTypes[12].OneofWrappers = []any{
 		(*PostCommitAction_SendWelcomes_)(nil),
 	}
-	file_mls_database_intents_proto_msgTypes[20].OneofWrappers = []any{}
+	file_mls_database_intents_proto_msgTypes[13].OneofWrappers = []any{
+		(*ProposeMemberUpdateData_V1_)(nil),
+	}
+	file_mls_database_intents_proto_msgTypes[14].OneofWrappers = []any{
+		(*ProposeGroupContextExtensionData_V1_)(nil),
+	}
+	file_mls_database_intents_proto_msgTypes[15].OneofWrappers = []any{
+		(*CommitPendingProposalsData_V1_)(nil),
+	}
+	file_mls_database_intents_proto_msgTypes[22].OneofWrappers = []any{}
+	file_mls_database_intents_proto_msgTypes[24].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_mls_database_intents_proto_rawDesc), len(file_mls_database_intents_proto_rawDesc)),
 			NumEnums:      3,
-			NumMessages:   23,
+			NumMessages:   31,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

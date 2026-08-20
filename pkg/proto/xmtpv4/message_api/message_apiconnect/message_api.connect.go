@@ -35,9 +35,15 @@ const (
 // reflection-formatted method names, remove the leading slash and convert the remaining slash to a
 // period.
 const (
+	// ReplicationApiSubscribeOriginatorsProcedure is the fully-qualified name of the ReplicationApi's
+	// SubscribeOriginators RPC.
+	ReplicationApiSubscribeOriginatorsProcedure = "/xmtp.xmtpv4.message_api.ReplicationApi/SubscribeOriginators"
 	// ReplicationApiSubscribeEnvelopesProcedure is the fully-qualified name of the ReplicationApi's
 	// SubscribeEnvelopes RPC.
 	ReplicationApiSubscribeEnvelopesProcedure = "/xmtp.xmtpv4.message_api.ReplicationApi/SubscribeEnvelopes"
+	// ReplicationApiSubscribeTopicsProcedure is the fully-qualified name of the ReplicationApi's
+	// SubscribeTopics RPC.
+	ReplicationApiSubscribeTopicsProcedure = "/xmtp.xmtpv4.message_api.ReplicationApi/SubscribeTopics"
 	// ReplicationApiQueryEnvelopesProcedure is the fully-qualified name of the ReplicationApi's
 	// QueryEnvelopes RPC.
 	ReplicationApiQueryEnvelopesProcedure = "/xmtp.xmtpv4.message_api.ReplicationApi/QueryEnvelopes"
@@ -54,11 +60,32 @@ const (
 
 // ReplicationApiClient is a client for the xmtp.xmtpv4.message_api.ReplicationApi service.
 type ReplicationApiClient interface {
+	// Node-to-node originator subscription
+	SubscribeOriginators(context.Context, *connect.Request[message_api.SubscribeOriginatorsRequest]) (*connect.ServerStreamForClient[message_api.SubscribeOriginatorsResponse], error)
+	// Deprecated: use SubscribeOriginators for node queries,
+	// QueryApi.SubscribeTopics for client queries
+	//
+	// Deprecated: do not use.
 	SubscribeEnvelopes(context.Context, *connect.Request[message_api.SubscribeEnvelopesRequest]) (*connect.ServerStreamForClient[message_api.SubscribeEnvelopesResponse], error)
+	// Deprecated: moved to QueryApi
+	//
+	// Deprecated: do not use.
+	SubscribeTopics(context.Context, *connect.Request[message_api.SubscribeTopicsRequest]) (*connect.ServerStreamForClient[message_api.SubscribeTopicsResponse], error)
+	// Deprecated: moved to QueryApi
+	//
+	// Deprecated: do not use.
 	QueryEnvelopes(context.Context, *connect.Request[message_api.QueryEnvelopesRequest]) (*connect.Response[message_api.QueryEnvelopesResponse], error)
+	// Deprecated: moved to PublishApi
+	//
+	// Deprecated: do not use.
 	PublishPayerEnvelopes(context.Context, *connect.Request[message_api.PublishPayerEnvelopesRequest]) (*connect.Response[message_api.PublishPayerEnvelopesResponse], error)
+	// Deprecated: moved to QueryApi
+	//
+	// Deprecated: do not use.
 	GetInboxIds(context.Context, *connect.Request[message_api.GetInboxIdsRequest]) (*connect.Response[message_api.GetInboxIdsResponse], error)
-	// Get the newest envelope for each topic
+	// Deprecated: moved to QueryApi
+	//
+	// Deprecated: do not use.
 	GetNewestEnvelope(context.Context, *connect.Request[message_api.GetNewestEnvelopeRequest]) (*connect.Response[message_api.GetNewestEnvelopeResponse], error)
 }
 
@@ -73,10 +100,22 @@ func NewReplicationApiClient(httpClient connect.HTTPClient, baseURL string, opts
 	baseURL = strings.TrimRight(baseURL, "/")
 	replicationApiMethods := message_api.File_xmtpv4_message_api_message_api_proto.Services().ByName("ReplicationApi").Methods()
 	return &replicationApiClient{
+		subscribeOriginators: connect.NewClient[message_api.SubscribeOriginatorsRequest, message_api.SubscribeOriginatorsResponse](
+			httpClient,
+			baseURL+ReplicationApiSubscribeOriginatorsProcedure,
+			connect.WithSchema(replicationApiMethods.ByName("SubscribeOriginators")),
+			connect.WithClientOptions(opts...),
+		),
 		subscribeEnvelopes: connect.NewClient[message_api.SubscribeEnvelopesRequest, message_api.SubscribeEnvelopesResponse](
 			httpClient,
 			baseURL+ReplicationApiSubscribeEnvelopesProcedure,
 			connect.WithSchema(replicationApiMethods.ByName("SubscribeEnvelopes")),
+			connect.WithClientOptions(opts...),
+		),
+		subscribeTopics: connect.NewClient[message_api.SubscribeTopicsRequest, message_api.SubscribeTopicsResponse](
+			httpClient,
+			baseURL+ReplicationApiSubscribeTopicsProcedure,
+			connect.WithSchema(replicationApiMethods.ByName("SubscribeTopics")),
 			connect.WithClientOptions(opts...),
 		),
 		queryEnvelopes: connect.NewClient[message_api.QueryEnvelopesRequest, message_api.QueryEnvelopesResponse](
@@ -108,45 +147,90 @@ func NewReplicationApiClient(httpClient connect.HTTPClient, baseURL string, opts
 
 // replicationApiClient implements ReplicationApiClient.
 type replicationApiClient struct {
+	subscribeOriginators  *connect.Client[message_api.SubscribeOriginatorsRequest, message_api.SubscribeOriginatorsResponse]
 	subscribeEnvelopes    *connect.Client[message_api.SubscribeEnvelopesRequest, message_api.SubscribeEnvelopesResponse]
+	subscribeTopics       *connect.Client[message_api.SubscribeTopicsRequest, message_api.SubscribeTopicsResponse]
 	queryEnvelopes        *connect.Client[message_api.QueryEnvelopesRequest, message_api.QueryEnvelopesResponse]
 	publishPayerEnvelopes *connect.Client[message_api.PublishPayerEnvelopesRequest, message_api.PublishPayerEnvelopesResponse]
 	getInboxIds           *connect.Client[message_api.GetInboxIdsRequest, message_api.GetInboxIdsResponse]
 	getNewestEnvelope     *connect.Client[message_api.GetNewestEnvelopeRequest, message_api.GetNewestEnvelopeResponse]
 }
 
+// SubscribeOriginators calls xmtp.xmtpv4.message_api.ReplicationApi.SubscribeOriginators.
+func (c *replicationApiClient) SubscribeOriginators(ctx context.Context, req *connect.Request[message_api.SubscribeOriginatorsRequest]) (*connect.ServerStreamForClient[message_api.SubscribeOriginatorsResponse], error) {
+	return c.subscribeOriginators.CallServerStream(ctx, req)
+}
+
 // SubscribeEnvelopes calls xmtp.xmtpv4.message_api.ReplicationApi.SubscribeEnvelopes.
+//
+// Deprecated: do not use.
 func (c *replicationApiClient) SubscribeEnvelopes(ctx context.Context, req *connect.Request[message_api.SubscribeEnvelopesRequest]) (*connect.ServerStreamForClient[message_api.SubscribeEnvelopesResponse], error) {
 	return c.subscribeEnvelopes.CallServerStream(ctx, req)
 }
 
+// SubscribeTopics calls xmtp.xmtpv4.message_api.ReplicationApi.SubscribeTopics.
+//
+// Deprecated: do not use.
+func (c *replicationApiClient) SubscribeTopics(ctx context.Context, req *connect.Request[message_api.SubscribeTopicsRequest]) (*connect.ServerStreamForClient[message_api.SubscribeTopicsResponse], error) {
+	return c.subscribeTopics.CallServerStream(ctx, req)
+}
+
 // QueryEnvelopes calls xmtp.xmtpv4.message_api.ReplicationApi.QueryEnvelopes.
+//
+// Deprecated: do not use.
 func (c *replicationApiClient) QueryEnvelopes(ctx context.Context, req *connect.Request[message_api.QueryEnvelopesRequest]) (*connect.Response[message_api.QueryEnvelopesResponse], error) {
 	return c.queryEnvelopes.CallUnary(ctx, req)
 }
 
 // PublishPayerEnvelopes calls xmtp.xmtpv4.message_api.ReplicationApi.PublishPayerEnvelopes.
+//
+// Deprecated: do not use.
 func (c *replicationApiClient) PublishPayerEnvelopes(ctx context.Context, req *connect.Request[message_api.PublishPayerEnvelopesRequest]) (*connect.Response[message_api.PublishPayerEnvelopesResponse], error) {
 	return c.publishPayerEnvelopes.CallUnary(ctx, req)
 }
 
 // GetInboxIds calls xmtp.xmtpv4.message_api.ReplicationApi.GetInboxIds.
+//
+// Deprecated: do not use.
 func (c *replicationApiClient) GetInboxIds(ctx context.Context, req *connect.Request[message_api.GetInboxIdsRequest]) (*connect.Response[message_api.GetInboxIdsResponse], error) {
 	return c.getInboxIds.CallUnary(ctx, req)
 }
 
 // GetNewestEnvelope calls xmtp.xmtpv4.message_api.ReplicationApi.GetNewestEnvelope.
+//
+// Deprecated: do not use.
 func (c *replicationApiClient) GetNewestEnvelope(ctx context.Context, req *connect.Request[message_api.GetNewestEnvelopeRequest]) (*connect.Response[message_api.GetNewestEnvelopeResponse], error) {
 	return c.getNewestEnvelope.CallUnary(ctx, req)
 }
 
 // ReplicationApiHandler is an implementation of the xmtp.xmtpv4.message_api.ReplicationApi service.
 type ReplicationApiHandler interface {
+	// Node-to-node originator subscription
+	SubscribeOriginators(context.Context, *connect.Request[message_api.SubscribeOriginatorsRequest], *connect.ServerStream[message_api.SubscribeOriginatorsResponse]) error
+	// Deprecated: use SubscribeOriginators for node queries,
+	// QueryApi.SubscribeTopics for client queries
+	//
+	// Deprecated: do not use.
 	SubscribeEnvelopes(context.Context, *connect.Request[message_api.SubscribeEnvelopesRequest], *connect.ServerStream[message_api.SubscribeEnvelopesResponse]) error
+	// Deprecated: moved to QueryApi
+	//
+	// Deprecated: do not use.
+	SubscribeTopics(context.Context, *connect.Request[message_api.SubscribeTopicsRequest], *connect.ServerStream[message_api.SubscribeTopicsResponse]) error
+	// Deprecated: moved to QueryApi
+	//
+	// Deprecated: do not use.
 	QueryEnvelopes(context.Context, *connect.Request[message_api.QueryEnvelopesRequest]) (*connect.Response[message_api.QueryEnvelopesResponse], error)
+	// Deprecated: moved to PublishApi
+	//
+	// Deprecated: do not use.
 	PublishPayerEnvelopes(context.Context, *connect.Request[message_api.PublishPayerEnvelopesRequest]) (*connect.Response[message_api.PublishPayerEnvelopesResponse], error)
+	// Deprecated: moved to QueryApi
+	//
+	// Deprecated: do not use.
 	GetInboxIds(context.Context, *connect.Request[message_api.GetInboxIdsRequest]) (*connect.Response[message_api.GetInboxIdsResponse], error)
-	// Get the newest envelope for each topic
+	// Deprecated: moved to QueryApi
+	//
+	// Deprecated: do not use.
 	GetNewestEnvelope(context.Context, *connect.Request[message_api.GetNewestEnvelopeRequest]) (*connect.Response[message_api.GetNewestEnvelopeResponse], error)
 }
 
@@ -157,10 +241,22 @@ type ReplicationApiHandler interface {
 // and JSON codecs. They also support gzip compression.
 func NewReplicationApiHandler(svc ReplicationApiHandler, opts ...connect.HandlerOption) (string, http.Handler) {
 	replicationApiMethods := message_api.File_xmtpv4_message_api_message_api_proto.Services().ByName("ReplicationApi").Methods()
+	replicationApiSubscribeOriginatorsHandler := connect.NewServerStreamHandler(
+		ReplicationApiSubscribeOriginatorsProcedure,
+		svc.SubscribeOriginators,
+		connect.WithSchema(replicationApiMethods.ByName("SubscribeOriginators")),
+		connect.WithHandlerOptions(opts...),
+	)
 	replicationApiSubscribeEnvelopesHandler := connect.NewServerStreamHandler(
 		ReplicationApiSubscribeEnvelopesProcedure,
 		svc.SubscribeEnvelopes,
 		connect.WithSchema(replicationApiMethods.ByName("SubscribeEnvelopes")),
+		connect.WithHandlerOptions(opts...),
+	)
+	replicationApiSubscribeTopicsHandler := connect.NewServerStreamHandler(
+		ReplicationApiSubscribeTopicsProcedure,
+		svc.SubscribeTopics,
+		connect.WithSchema(replicationApiMethods.ByName("SubscribeTopics")),
 		connect.WithHandlerOptions(opts...),
 	)
 	replicationApiQueryEnvelopesHandler := connect.NewUnaryHandler(
@@ -189,8 +285,12 @@ func NewReplicationApiHandler(svc ReplicationApiHandler, opts ...connect.Handler
 	)
 	return "/xmtp.xmtpv4.message_api.ReplicationApi/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
+		case ReplicationApiSubscribeOriginatorsProcedure:
+			replicationApiSubscribeOriginatorsHandler.ServeHTTP(w, r)
 		case ReplicationApiSubscribeEnvelopesProcedure:
 			replicationApiSubscribeEnvelopesHandler.ServeHTTP(w, r)
+		case ReplicationApiSubscribeTopicsProcedure:
+			replicationApiSubscribeTopicsHandler.ServeHTTP(w, r)
 		case ReplicationApiQueryEnvelopesProcedure:
 			replicationApiQueryEnvelopesHandler.ServeHTTP(w, r)
 		case ReplicationApiPublishPayerEnvelopesProcedure:
@@ -208,8 +308,16 @@ func NewReplicationApiHandler(svc ReplicationApiHandler, opts ...connect.Handler
 // UnimplementedReplicationApiHandler returns CodeUnimplemented from all methods.
 type UnimplementedReplicationApiHandler struct{}
 
+func (UnimplementedReplicationApiHandler) SubscribeOriginators(context.Context, *connect.Request[message_api.SubscribeOriginatorsRequest], *connect.ServerStream[message_api.SubscribeOriginatorsResponse]) error {
+	return connect.NewError(connect.CodeUnimplemented, errors.New("xmtp.xmtpv4.message_api.ReplicationApi.SubscribeOriginators is not implemented"))
+}
+
 func (UnimplementedReplicationApiHandler) SubscribeEnvelopes(context.Context, *connect.Request[message_api.SubscribeEnvelopesRequest], *connect.ServerStream[message_api.SubscribeEnvelopesResponse]) error {
 	return connect.NewError(connect.CodeUnimplemented, errors.New("xmtp.xmtpv4.message_api.ReplicationApi.SubscribeEnvelopes is not implemented"))
+}
+
+func (UnimplementedReplicationApiHandler) SubscribeTopics(context.Context, *connect.Request[message_api.SubscribeTopicsRequest], *connect.ServerStream[message_api.SubscribeTopicsResponse]) error {
+	return connect.NewError(connect.CodeUnimplemented, errors.New("xmtp.xmtpv4.message_api.ReplicationApi.SubscribeTopics is not implemented"))
 }
 
 func (UnimplementedReplicationApiHandler) QueryEnvelopes(context.Context, *connect.Request[message_api.QueryEnvelopesRequest]) (*connect.Response[message_api.QueryEnvelopesResponse], error) {

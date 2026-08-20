@@ -15,73 +15,7 @@
   "produces": [
     "application/json"
   ],
-  "paths": {
-    "/mls/v2/payer/get-nodes": {
-      "post": {
-        "operationId": "PayerApi_GetNodes",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/payer_apiGetNodesResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/payer_apiGetNodesRequest"
-            }
-          }
-        ],
-        "tags": [
-          "PayerApi"
-        ]
-      }
-    },
-    "/mls/v2/payer/publish-client-envelopes": {
-      "post": {
-        "summary": "Publish envelope",
-        "operationId": "PayerApi_PublishClientEnvelopes",
-        "responses": {
-          "200": {
-            "description": "A successful response.",
-            "schema": {
-              "$ref": "#/definitions/payer_apiPublishClientEnvelopesResponse"
-            }
-          },
-          "default": {
-            "description": "An unexpected error response.",
-            "schema": {
-              "$ref": "#/definitions/rpcStatus"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/payer_apiPublishClientEnvelopesRequest"
-            }
-          }
-        ],
-        "tags": [
-          "PayerApi"
-        ]
-      }
-    }
-  },
+  "paths": {},
   "definitions": {
     "SignatureECDSACompact": {
       "type": "object",
@@ -539,9 +473,6 @@
       "description": "- WELCOME_WRAPPER_ALGORITHM_SYMMETRIC_KEY: Only used for WelcomePointee's",
       "title": "Describes the algorithm used to encrypt the Welcome Wrapper"
     },
-    "payer_apiGetNodesRequest": {
-      "type": "object"
-    },
     "payer_apiGetNodesResponse": {
       "type": "object",
       "properties": {
@@ -549,18 +480,6 @@
           "type": "object",
           "additionalProperties": {
             "type": "string"
-          }
-        }
-      }
-    },
-    "payer_apiPublishClientEnvelopesRequest": {
-      "type": "object",
-      "properties": {
-        "envelopes": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "$ref": "#/definitions/envelopesClientEnvelope"
           }
         }
       }
